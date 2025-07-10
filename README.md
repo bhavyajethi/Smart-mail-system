@@ -9,10 +9,10 @@ An AI-powered system designed to fetch unread emails, analyze their content, and
 ### Sends WhatsApp notifications via UltraMsg for quick alerts.
 
 # **Prequisites**
-Python 3.x
-Git
-Google Cloud Project with enabled APIs (Gmail, Docs, Calendar)
-UltraMsg account for WhatsApp notifications
+ -Python 3.x
+ -Git
+ -Google Cloud Project with enabled APIs (Gmail, Docs, Calendar)
+ -UltraMsg account for WhatsApp notifications
 
 
 # **Installation**
