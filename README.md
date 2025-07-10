@@ -46,13 +46,11 @@ Run the script once to generate token.json for authentication.
 
 6. # **Usage**
 1) Ensure all prerequisites and configurations are set up.
-2) Run the main script:
-  ```bash
-   python test_agent.py
+2) Run the main script: python test_agent.py
 3) The script will:
 Fetch unread emails.
 Analyze and print extracted data.
 Store results in a Google Doc.
 Send a WhatsApp notification.
 
-7. # **NOTE**: This project is under development so any feedbacks and discussions are welcome. Thank you!!!
+7.  # **Usage**: This project is under development so any feedbacks and discussions are welcome. Thank you!!!
