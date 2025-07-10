@@ -39,10 +39,11 @@ Place gc_credentials.json in the project root directory.
 Run the script once to generate token.json for authentication.
 
 5. # **Environment Variables Required**
-- GEMINI AI API KEY
-- GOOGLE DOCS DOCUMENT ID
-- ULTRA_MSG_INSTANCE_ID
-- ULTRA_MSG_TOKEN
+- GEMINI AI API KEY=your_google_api_key
+- GOOGLE DOCS DOCUMENT ID=your_googledoc_id
+- ULTRA_MSG_INSTANCE_ID=your_instance_id
+- ULTRA_MSG_TOKEN=your_ultramsg_instance_id
+- WHATSAPP_NUMBER=your_whatsapp_number_with_country_code
 
 6. # **Usage**
 1) Ensure all prerequisites and configurations are set up.
