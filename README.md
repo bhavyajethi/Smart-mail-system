@@ -1,4 +1,5 @@
 # AI smart mail system
+# **NOTE**: This project is under development so any feedbacks and discussions are welcome. Thank you!!!
 
 An AI-powered system designed to fetch unread emails, analyze their content, and extract structured information (e.g., important dates, company names), with the option to store data in Google Docs, send WhatsApp notifications, and create calendar events. This project is intended to assist students and working professionals who may overlook critical opportunities such as interviews or competitions. The system works by retrieving and analyzing emails to identify key details like the purpose of the email, dates, and times, then sending a WhatsApp message to ensure users can stay informed almost immediately.
 
@@ -52,5 +53,3 @@ Fetch unread emails.
 Analyze and print extracted data.
 Store results in a Google Doc.
 Send a WhatsApp notification.
-
-7.  # **Usage**: This project is under development so any feedbacks and discussions are welcome. Thank you!!!
