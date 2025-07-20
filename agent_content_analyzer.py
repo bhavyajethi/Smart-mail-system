@@ -42,7 +42,7 @@ Only return the JSON object. No explanation, no formatting, no markdown.
         # Parse JSON response
         data = json.loads(raw_text)
 
-        # ✅ Recalculate is_actionable to ensure consistency
+        # Recalculate is_actionable to ensure consistency
         if data.get("interview_dates") and data.get("times"):
             data["is_actionable"] = True
         else:
@@ -51,6 +51,6 @@ Only return the JSON object. No explanation, no formatting, no markdown.
         return data
 
     except Exception as e:
-        print("❌ Error parsing Gemini response:", e)
+        print(" Error parsing Gemini response:", e)
         print("Raw output:\n", response.text if 'response' in locals() else 'No response')
         return None

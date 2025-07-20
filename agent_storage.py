@@ -1,119 +1,225 @@
+# from twilio.rest import Client
+# from googleapiclient.discovery import build
+# from agent_mail_fetcher import authenticate_gmail
+# from google_calender import create_events_on_calendar
+# from dotenv import load_dotenv
+# import os
+# import requests
+
+# load_dotenv()
+
+# DOCUMENT_ID = os.getenv("DOCUMENT_ID")
+# ULTRA_MSG_INSTANCE_ID = os.getenv("ULTRA_MSG_INSTANCE_ID")
+# ULTRA_MSG_TOKEN = os.getenv("ULTRA_MSG_TOKEN")
+
+
+# def send_whatsapp_notification(subject, date, time):
+#     if date != "No Date" and time != "No Time":
+#         body = f"""📬 NEW EMAIL:
+# Subject: {subject}
+# Date(s): {date}
+# Time(s): {time}
+# 📅 Date and Time detected. Event added to calendar."""
+#     elif date != "No Date" or time != "No Time":
+#         body = f"""📬 NEW EMAIL:
+# Subject: {subject}
+# Date(s): {date}
+# Time(s): {time}
+# ⚠️ Only Date or Time detected. Not added to calendar."""
+#     else:
+#         body = f"""📬 NEW EMAIL:
+# Subject: {subject}
+# 📭 No Date or Time detected. Only added to Notes Doc."""
+
+#     url = f"https://api.ultramsg.com/{ULTRA_MSG_INSTANCE_ID}/messages/chat"
+#     payload = {
+#         "token": ULTRA_MSG_TOKEN,
+#         "to": os.getenv("WHATSAPP_NUMBER"),
+#         "body": body
+#     }
+
+#     try:
+#         response = requests.post(url, data=payload)
+#         if response.status_code == 200:
+#             print("✅ WhatsApp message sent.")
+#         else:
+#             print("❌ WhatsApp send failed:", response.json())
+#     except Exception as e:
+#         print("❌ UltraMsg error:", e)
+
+
+# def store_email_data(email):
+#     creds = authenticate_gmail()._http.credentials
+#     docs_service = build('docs', 'v1', credentials=creds)
+
+#     subject = email.get("subject", "")
+#     sender = email.get("from", "")
+#     body = email.get("body", "")
+#     dates = email.get("dates", [])
+#     times = email.get("times", [])
+
+#     interview_dates = ', '.join(dates) if dates else "No Date"
+#     time_str = ', '.join(times) if times else "No Time"
+#     is_actionable = bool(dates and times)
+
+#     send_whatsapp_notification(subject, interview_dates, time_str)
+
+#     # ✅ Add to calendar if actionable
+#     if is_actionable:
+#         create_events_on_calendar(subject, body, dates, times)
+
+#     msg_type = (
+#         "📅 Date and time detected — Event added to calendar." if is_actionable
+#         else "🕒 Partial info detected — Not added to calendar, but saved to notes."
+#         if dates or times
+#         else "❌ No date/time detected — Saved to notes."
+#     )
+
+#     doc_entry = f"""
+# 📩 *New Email Summary*
+# -----------------------------
+# 🟢 Subject: {subject}
+# ✉️ Sender: {sender}
+# 📝 Summary: {body[:100]}...
+# 📅 Dates: {interview_dates}
+# ⏰ Times: {time_str}
+# ✅ Actionable: {"Yes" if is_actionable else "No"}
+
+# {msg_type}
+# =============================
+
+# """
+
+#     try:
+#         docs_service.documents().batchUpdate(
+#             documentId=DOCUMENT_ID,
+#             body={'requests': [{'insertText': {'location': {'index': 1}, 'text': doc_entry}}]}
+#         ).execute()
+#         print("📄 Stored in Google Docs.")
+#     except Exception as e:
+#         print("❌ Google Docs error:", e)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 from twilio.rest import Client
 from googleapiclient.discovery import build
-from agent_mail_fetcher import authenticate_gmail  # Reuses same token flow
+from agent_mail_fetcher import authenticate_gmail
+from google_calender import create_events_on_calendar
 from dotenv import load_dotenv
 import os
+import requests
 
 load_dotenv()
 
-# Only needed for Docs API
-SCOPES = ['https://www.googleapis.com/auth/documents']
-
-DOCUMENT_ID = os.getenv("DOCUMENT_ID")  # Your Google Doc ID
-
-# ✅ WhatsApp Notification
-import requests
-
-# ✅ UltraMsg Configuration
+DOCUMENT_ID = os.getenv("DOCUMENT_ID")
 ULTRA_MSG_INSTANCE_ID = os.getenv("ULTRA_MSG_INSTANCE_ID")
 ULTRA_MSG_TOKEN = os.getenv("ULTRA_MSG_TOKEN")
 
-# ✅ WhatsApp Message Sender via UltraMsg
-def send_whatsapp_notification(subject, date, time):
-    # Determine message based on info presence
-    if date != "No Date" and time != "No Time":
-        body = f"""📬 NEW EMAIL:
-Subject: {subject}
-Date(s): {date}
-Time(s): {time}
-📅 Date and Time detected. Event added to calendar."""
-    elif date != "No Date" or time != "No Time":
-        body = f"""📬 NEW EMAIL:
-Subject: {subject}
-Date(s): {date}
-Time(s): {time}
-⚠️ Only Date or Time detected. Not added to calendar."""
-    else:
-        body = f"""📬 NEW EMAIL:
-Subject: {subject}
-📭 No Date or Time detected. Only added to Notes Doc."""
 
-    # ✅ UltraMsg API request
+def send_whatsapp_notification(subject, dates, times):
+    has_date = dates and dates != "No Date"
+    has_time = times and times != "No Time"
+
+    if has_date and has_time:
+        body = f""" NEW EMAIL:
+Subject: {subject}
+Date(s): {dates}
+Time(s): {times}
+Date and Time detected. Event added to calendar."""
+    elif has_date or has_time:
+        body = f""" NEW EMAIL:
+Subject: {subject}
+Date(s): {dates}
+Time(s): {times}
+Only Date or Time detected. Not added to calendar."""
+    else:
+        body = f""" NEW EMAIL:
+Subject: {subject}
+Date(s): {dates}
+Time(s): {times}
+No Date or Time detected. Only added to Notes Doc."""
+
     url = f"https://api.ultramsg.com/{ULTRA_MSG_INSTANCE_ID}/messages/chat"
     payload = {
         "token": ULTRA_MSG_TOKEN,
-        "to": os.getenv("WHATSAPP_NUMBER"),  # Your WhatsApp number with country code
+        "to": os.getenv("WHATSAPP_NUMBER"),
         "body": body
     }
 
     try:
         response = requests.post(url, data=payload)
-        response_data = response.json()
-        if response.status_code == 200 and response_data.get("sent"):
-            print("✅ WhatsApp message sent via UltraMsg.")
+        if response.status_code == 200:
+            print("WhatsApp message sent.")
         else:
-            print("❌ Failed to send WhatsApp message:", response_data)
+            print("WhatsApp send failed:", response.json())
     except Exception as e:
-        print("❌ UltraMsg API error:", e)
+        print("UltraMsg error:", e)
 
 
-# ✅ Store to Google Docs instead of local DB
-def store_email_data(email, extracted):
-    creds = authenticate_gmail()._http.credentials  # Get credentials from Gmail service
+def store_email_data(email):
+    creds = authenticate_gmail()._http.credentials
     docs_service = build('docs', 'v1', credentials=creds)
 
-    # Extract fields
     subject = email.get("subject", "")
-    sender = email.get("sender", "")
-    summary = extracted.get("summary", "")
-    companies = ', '.join(extracted.get("companies", []))
-    interview_dates = ', '.join(extracted.get("interview_dates", [])) or "No Date"
-    times = ', '.join(extracted.get("times", [])) or "No Time"
-    is_actionable = extracted.get("is_actionable", False)
+    sender = email.get("from", "")
+    body = email.get("body", "")
+    dates = email.get("interview_dates", [])  # ✅ Corrected key
+    times = email.get("times", [])            # ✅ Already correct
 
-    # ✅ Send WhatsApp Notification
-    send_whatsapp_notification(subject, interview_dates, times)
+    interview_dates = ', '.join(dates) if dates else "No Date"
+    time_str = ', '.join(times) if times else "No Time"
+    is_actionable = bool(dates and times)
 
-    # Message type to insert in docs
+    #  Send WhatsApp notification with correct values
+    send_whatsapp_notification(subject, interview_dates, time_str)
+
+    # Add to calendar if both date and time present
+    if is_actionable:
+        create_events_on_calendar(subject, body, dates, times)
+
     msg_type = (
-        "📅 Date and time detected — Event added to calendar." if extracted["interview_dates"] and extracted["times"]
-        else "🕒 Partial info detected — Not added to calendar, but saved to notes."
-        if extracted["interview_dates"] or extracted["times"]
-        else "❌ No date/time detected — Saved to notes."
+        "Date and time detected — Event added to calendar." if is_actionable
+        else " Partial info detected — Not added to calendar, but saved to notes."
+        if dates or times
+        else " No date/time detected — Saved to notes."
     )
 
-    # Format for Google Doc
     doc_entry = f"""
-📩 *New Email Summary*
+*New Email Summary*
 -----------------------------
-🟢 Subject: {subject}
-✉️ Sender: {sender}
-📝 Summary: {summary}
-🏢 Companies: {companies}
-📅 Dates: {interview_dates}
-⏰ Times: {times}
-✅ Actionable: {"Yes" if is_actionable else "No"}
+Subject: {subject}
+Sender: {sender}
+Summary: {body[:100]}...
+Dates: {interview_dates}
+Times: {time_str}
+Actionable: {"Yes" if is_actionable else "No"}
 
 {msg_type}
 =============================
 
 """
 
-    # ✅ Append to Google Docs
     try:
         docs_service.documents().batchUpdate(
             documentId=DOCUMENT_ID,
-            body={
-                'requests': [
-                    {
-                        'insertText': {
-                            'location': {'index': 1},
-                            'text': doc_entry
-                        }
-                    }
-                ]
-            }
+            body={'requests': [{'insertText': {'location': {'index': 1}, 'text': doc_entry}}]}
         ).execute()
-        print("📄 Email data stored in Google Doc successfully.")
+        print(" Stored in Google Docs.")
     except Exception as e:
-        print("❌ Error storing email data in Google Doc:", e)
+        print(" Google Docs error:", e)

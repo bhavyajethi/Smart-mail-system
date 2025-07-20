@@ -64,6 +64,20 @@ def extract_dates(body):
             dates.append(date_match.strftime("%Y-%m-%d"))
     return dates
 
+import re
+
+def extract_times(body):
+    times = []
+    time_patterns = [
+        r'\b\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?',
+        r'\b\d{1,2}(?:AM|PM|am|pm)\b',
+    ]
+    for line in body.splitlines():
+        for pattern in time_patterns:
+            matches = re.findall(pattern, line)
+            times.extend(matches)
+    return times
+
 def fetch_unread_emails():
     service = authenticate_gmail()
     results = service.users().messages().list(
@@ -87,13 +101,15 @@ def fetch_unread_emails():
         date = mime_msg['date']
         body = extract_body(mime_msg)
         dates = extract_dates(body)
+        times = extract_times(body)
 
         email_data.append({
             "subject": subject,
             "from": sender,
             "date": date,
             "body": body,
-            "dates": dates
+            "dates": dates,
+            "times": times
         })
 
     return email_data
